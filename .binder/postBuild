@@ -1,0 +1,18 @@
+#!/bin/bash
+set -euo pipefail
+
+python -m pip install --no-cache-dir --upgrade pip wheel setuptools \
+  'hycfg @ git+https://gitlab.com/hylleraasplatform/hycfg.git@main'
+
+python -m hsp install --channel dev --remote https --hytest off
+
+python -m pip install --no-cache-dir --upgrade \
+  'hytools[editor] @ git+https://gitlab.com/hylleraasplatform/hylleraas-tools.git@4311c5fd67b0849ec81f27824061eb79b7ef78fb'
+
+python - <<'PY'
+import hylleraas as hsp
+
+editor = hsp.Molecule("O").view(viewer="editor")
+editor.close()
+print("HSP and molecule editor initialization succeeded.")
+PY
