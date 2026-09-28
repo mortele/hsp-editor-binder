@@ -1,20 +1,57 @@
 #!/bin/bash
 set -euo pipefail
 
+HYTOOLS_REF=d0c2670a219d5eefc620d6638b5800cae1093acb
+HYLLERAAS_REF=677d147116b8d770027c8eeb07b3c0dc4033b968
+
 python -m pip install --no-cache-dir --upgrade pip wheel setuptools
 
 # Install the complete, dated HSP snapshot.
 python -m pip install --no-cache-dir \
   'hylleraas @ git+https://gitlab.com/hylleraasplatform/hylleraas.git@2026-09-16'
 
-# Replace hytools with the molecule editor MR.
+# hytools MR !273, including the optional notebook widget dependencies.
 python -m pip install --no-cache-dir --upgrade \
-  'hytools[editor] @ git+https://gitlab.com/hylleraasplatform/hylleraas-tools.git@4311c5fd67b0849ec81f27824061eb79b7ef78fb'
+  "hytools[editor] @ git+https://gitlab.com/hylleraasplatform/hylleraas-tools.git@${HYTOOLS_REF}"
 
-python - <<'PY'
+# hylleraas MR !88. Its normal dependencies track main; retain the snapshot.
+python -m pip install --no-cache-dir --upgrade --no-deps \
+  "hylleraas @ git+https://gitlab.com/hylleraasplatform/hylleraas.git@${HYLLERAAS_REF}"
+
+python - "$HYTOOLS_REF" "$HYLLERAAS_REF" <<'PY'
+import json
+import sys
+from importlib.metadata import distribution
+
 import hylleraas as hsp
 
-editor = hsp.Molecule("CCO").view(viewer="editor")
-editor.close()
-print("HSP and molecule editor initialization succeeded.")
+for name, expected in zip(('hytools', 'hylleraas'), sys.argv[1:]):
+    installed = distribution(name)
+    source = json.loads(installed.read_text('direct_url.json'))
+    assert source['vcs_info']['commit_id'] == expected, (name, source)
+    print(f'{name}: {installed.version} ({expected})')
+
+editor = hsp.edit_molecule()
+try:
+    assert editor.to_molecule().num_atoms == 0
+    editor.add_atom('C', [0., 0., 0.], coordination='smart')
+    molecule = editor.to_molecule()
+    assert molecule.atoms == ['C', 'H', 'H', 'H', 'H']
+    editor.undo()
+    assert editor.to_molecule().num_atoms == 0
+    assert molecule.num_atoms == 5
+finally:
+    editor.close()
+
+ethanol = hsp.Molecule('CCO')
+editor = hsp.edit_molecule(ethanol)
+try:
+    molecule = editor.to_molecule()
+    assert molecule is not ethanol
+    assert molecule.atoms == ethanol.atoms
+    assert molecule.num_atoms == 9
+finally:
+    editor.close()
+
+print('HSP editor: empty session, inferred hydrogens, export and ethanol OK.')
 PY
