@@ -17,7 +17,7 @@ packages replaced by the paired editor MRs:
 
 | Package | Source | Pinned commit |
 | --- | --- | --- |
-| hytools | [MR !273](https://gitlab.com/hylleraasplatform/hylleraas-tools/-/merge_requests/273) | `d0c2670a219d5eefc620d6638b5800cae1093acb` |
+| hytools | [MR !273](https://gitlab.com/hylleraasplatform/hylleraas-tools/-/merge_requests/273) | `4890623347f5cfca79206b3afcf60f4a82d4ef52` |
 | hylleraas | [MR !88](https://gitlab.com/hylleraasplatform/hylleraas/-/merge_requests/88) | `677d147116b8d770027c8eeb07b3c0dc4033b968` |
 
 `.binder/postBuild` installs the snapshot first, then `hytools[editor]`, then

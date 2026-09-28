@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-HYTOOLS_REF=d0c2670a219d5eefc620d6638b5800cae1093acb
+HYTOOLS_REF=4890623347f5cfca79206b3afcf60f4a82d4ef52
 HYLLERAAS_REF=677d147116b8d770027c8eeb07b3c0dc4033b968
 
 python -m pip install --no-cache-dir --upgrade pip wheel setuptools
