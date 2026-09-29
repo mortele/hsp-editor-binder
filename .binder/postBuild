@@ -18,6 +18,8 @@ python -m pip install --no-cache-dir --upgrade \
 python -m pip install --no-cache-dir --upgrade --no-deps \
   "hylleraas @ git+https://gitlab.com/hylleraasplatform/hylleraas.git@${HYLLERAAS_REF}"
 
+xtb --version
+
 python - "$HYTOOLS_REF" "$HYLLERAAS_REF" <<'PY'
 import json
 import sys
@@ -50,8 +52,10 @@ try:
     assert molecule is not ethanol
     assert molecule.atoms == ethanol.atoms
     assert molecule.num_atoms == 9
+    xtb = next(item for item in editor.optimizers if item['id'] == 'xtb-gfn2')
+    assert xtb.get('available', True), xtb.get('unavailable_reason')
 finally:
     editor.close()
 
-print('HSP editor: empty session, inferred hydrogens, export and ethanol OK.')
+print('HSP editor: building, export, ethanol and xTB availability OK.')
 PY
